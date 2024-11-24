@@ -6,6 +6,7 @@ import androidx.compose.ui.window.ApplicationScope
 import com.kdroid.composetray.menu.api.TrayMenuBuilder
 import com.kdroid.composetray.tray.impl.AwtTrayInitializer
 import com.kdroid.composetray.tray.impl.LinuxTrayInitializer
+import com.kdroid.composetray.tray.impl.MacOsTrayInitializer
 import com.kdroid.composetray.tray.impl.WindowsTrayInitializer
 import com.kdroid.composetray.utils.OperatingSystem
 import com.kdroid.composetray.utils.PlatformUtils
@@ -22,6 +23,7 @@ internal class NativeTray(
     tooltip: String = "",
     primaryAction: (() -> Unit)?,
     primaryActionLinuxLabel: String,
+    onResize: (() -> Unit)? = null,
     menuContent: (TrayMenuBuilder.() -> Unit)? = null
 ) {
     val trayScope = CoroutineScope(Dispatchers.IO + SupervisorJob())
@@ -37,8 +39,10 @@ internal class NativeTray(
                     menuContent
                 )
 
-                OperatingSystem.MAC, OperatingSystem.UNKNOWN ->
-                    AwtTrayInitializer.initialize(iconPath, tooltip, primaryAction, menuContent)
+                OperatingSystem.MAC ->
+                    MacOsTrayInitializer.initialize(iconPath, tooltip, primaryAction, onResize, menuContent)
+                OperatingSystem.UNKNOWN ->
+                    AwtTrayInitializer.initialize(iconPath, tooltip, primaryAction?.let { { it() } }, onResize, menuContent)
             }
         }
     }
@@ -52,6 +56,7 @@ fun ApplicationScope.Tray(
     tooltip: String,
     primaryAction: (() -> Unit)? = null,
     primaryActionLinuxLabel: String = "Open",
+    onResize: (() -> Unit)? = null,
     menuContent: (TrayMenuBuilder.() -> Unit)? = null
 ) {
     DisposableEffect(Unit) {
@@ -61,7 +66,8 @@ fun ApplicationScope.Tray(
             tooltip = tooltip,
             primaryAction = primaryAction,
             primaryActionLinuxLabel = primaryActionLinuxLabel,
-            menuContent = menuContent
+            menuContent = menuContent,
+            onResize = onResize
         )
 
         onDispose {

@@ -2,11 +2,11 @@ package com.kdroid.composetray.utils
 
 import java.util.*
 
-internal enum class OperatingSystem {
+enum class OperatingSystem {
     WINDOWS, MAC, LINUX, UNKNOWN
 }
 
-internal object PlatformUtils {
+object PlatformUtils {
     val currentOS: OperatingSystem
         get() {
             val osName = System.getProperty("os.name").lowercase(Locale.getDefault())

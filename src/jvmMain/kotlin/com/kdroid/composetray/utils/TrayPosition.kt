@@ -4,6 +4,7 @@ import WindowsNativeTrayLibrary
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.WindowPosition
 import com.kdroid.composetray.tray.impl.AwtTrayInitializer
+import com.kdroid.composetray.tray.impl.MacOsTrayInitializer
 import com.sun.jna.Native
 import java.awt.Toolkit
 import java.io.File
@@ -71,7 +72,7 @@ fun getTrayWindowPosition(windowWidth: Int, windowHeight: Int): WindowPosition {
 
     when (PlatformUtils.currentOS) {
         OperatingSystem.MAC -> {
-            return AwtTrayInitializer.getWindowPosition(windowWidth, windowHeight)
+            return MacOsTrayInitializer.getWindowPosition(windowWidth, windowHeight)
         }
         else -> {
             val trayPosition = getTrayPosition()
