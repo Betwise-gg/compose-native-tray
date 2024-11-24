@@ -3,6 +3,7 @@ package com.kdroid.composetray.utils
 import WindowsNativeTrayLibrary
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.WindowPosition
+import com.kdroid.composetray.tray.impl.AwtTrayInitializer
 import com.sun.jna.Native
 import java.awt.Toolkit
 import java.io.File
@@ -51,7 +52,7 @@ fun getTrayPosition(): TrayPosition {
             val trayLib: WindowsNativeTrayLibrary = Native.load("tray", WindowsNativeTrayLibrary::class.java)
             return getWindowsTrayPosition(trayLib.tray_get_notification_icons_region())
         }
-        OperatingSystem.MAC -> return TrayPosition.TOP_RIGHT //Todo
+        OperatingSystem.MAC,
         OperatingSystem.LINUX -> {
             val properties = Properties()
             val file = File(PROPERTIES_FILE)
@@ -67,15 +68,23 @@ fun getTrayPosition(): TrayPosition {
 }
 
 fun getTrayWindowPosition(windowWidth: Int, windowHeight: Int): WindowPosition {
-    val trayPosition = getTrayPosition()
-    val screenSize = Toolkit.getDefaultToolkit().screenSize
-    return when (trayPosition) {
-        TrayPosition.TOP_LEFT -> WindowPosition(x = 0.dp, y = 0.dp)
-        TrayPosition.TOP_RIGHT -> WindowPosition(x = (screenSize.width - windowWidth).dp, y = 0.dp)
-        TrayPosition.BOTTOM_LEFT -> WindowPosition(x = 0.dp, y = (screenSize.height - windowHeight).dp)
-        TrayPosition.BOTTOM_RIGHT -> WindowPosition(
-            x = (screenSize.width - windowWidth).dp,
-            y = (screenSize.height - windowHeight).dp
-        )
+
+    when (PlatformUtils.currentOS) {
+        OperatingSystem.MAC -> {
+            return AwtTrayInitializer.getWindowPosition(windowWidth, windowHeight)
+        }
+        else -> {
+            val trayPosition = getTrayPosition()
+            val screenSize = Toolkit.getDefaultToolkit().screenSize
+            return when (trayPosition) {
+                TrayPosition.TOP_LEFT -> WindowPosition(x = 0.dp, y = 0.dp)
+                TrayPosition.TOP_RIGHT -> WindowPosition(x = (screenSize.width - windowWidth).dp, y = 0.dp)
+                TrayPosition.BOTTOM_LEFT -> WindowPosition(x = 0.dp, y = (screenSize.height - windowHeight).dp)
+                TrayPosition.BOTTOM_RIGHT -> WindowPosition(
+                    x = (screenSize.width - windowWidth).dp,
+                    y = (screenSize.height - windowHeight).dp
+                )
+            }
+        }
     }
 }

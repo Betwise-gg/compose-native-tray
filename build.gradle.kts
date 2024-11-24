@@ -2,13 +2,13 @@ import com.vanniktech.maven.publish.SonatypeHost
 import org.jetbrains.compose.desktop.application.dsl.TargetFormat
 
 plugins {
-    kotlin("jvm") version "2.0.20"
+    kotlin("multiplatform") version "2.0.20"
     id("org.jetbrains.compose") version "1.7.0"
     id("org.jetbrains.kotlin.plugin.compose") version "2.0.21"
     id("com.vanniktech.maven.publish") version "0.30.0"
 }
 
-group = "com.kdroid.composenativetray"
+group = "gg.betwise.compose"
 version = "0.4.0"
 
 repositories {
@@ -18,21 +18,39 @@ repositories {
 
 }
 
-dependencies {
-    implementation("net.java.dev.jna:jna:5.15.0")
-    implementation("net.java.dev.jna:jna-platform:5.15.0")
-    implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.9.0")
-    implementation("io.github.kdroidfilter:kmplog:0.3.0")
-    implementation(compose.desktop.currentOs)
-    testImplementation("org.jetbrains.compose.material3:material3-desktop:1.7.0")
-    testImplementation(kotlin("test"))
-}
 
-tasks.test {
-    useJUnitPlatform()
-}
 kotlin {
     jvmToolchain(17)
+
+    jvm()
+
+//    macosX64()
+//    macosArm64()
+
+    sourceSets {
+        val commonMain by getting {
+            dependencies {
+                implementation(compose.runtime)
+                implementation(compose.foundation)
+                implementation(compose.ui)
+            }
+        }
+        val jvmMain by getting {
+            dependencies {
+                implementation("net.java.dev.jna:jna:5.15.0")
+                implementation("net.java.dev.jna:jna-platform:5.15.0")
+                implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.9.0")
+                implementation("io.github.kdroidfilter:kmplog:0.3.0")
+                implementation(compose.desktop.currentOs)
+            }
+        }
+        val jvmTest by getting {
+            dependencies {
+                implementation("org.jetbrains.compose.material3:material3-desktop:1.7.0")
+                implementation(kotlin("test"))
+            }
+        }
+    }
 }
 
 mavenPublishing {
